@@ -1,6 +1,6 @@
 import streamlit as st
 from langchain_community.document_loaders import PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_pinecone import PineconeVectorStore
 from pinecone import Pinecone, ServerlessSpec
@@ -28,12 +28,8 @@ if INDEX_NAME not in pc.list_indexes().names():
     )
 
 # Initialize embeddings and LLM
-embeddings = OpenAIEmbeddings(openai_api_key=os.getenv("OPENAI_API_KEY"))
-llm = ChatOpenAI(
-    temperature=0,
-    model="gpt-4o-mini",
-    openai_api_key=os.getenv("OPENAI_API_KEY")
-)
+embeddings = OpenAIEmbeddings()
+llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
 # Streamlit UI
 st.title("📚 PDF Chat with Citations")
@@ -154,7 +150,7 @@ Answer with citations:"""
                 preview = doc.page_content[:200] + "..." if len(doc.page_content) > 200 else doc.page_content
                 citations += f"\n**[Source {i+1}]** {source} - Page {page}\n> {preview}\n"
             
-            full_response = answer + citations
+            full_response = str(answer) + str(citations)
             message_placeholder.markdown(full_response)
             
             st.session_state.messages.append({"role": "assistant", "content": full_response})
